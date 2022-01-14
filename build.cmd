@@ -25,12 +25,13 @@ python -c "v = open('aseprite/src/ver/CMakeLists.txt').read(); open('aseprite/sr
 echo downloading skia
 mkdir skia
 cd skia
-curl -sfLO https://github.com/aseprite/skia/releases/download/m81-b607b32047/Skia-Windows-Release-x64.zip || echo failed to download skia && exit /b
+curl -sfLO https://github.com/aseprite/skia/releases/download/m96-2f1f21b8a9/Skia-Windows-Release-x64.zip || echo failed to download skia && exit /b
 7z x -y Skia-Windows-Release-x64.zip
 cd ..
 
 
 echo building asesprite
+set LINK=opengl32.lib
 cmake                                          ^
   -G "Visual Studio 16 2019"                   ^
   -A x64                                       ^
