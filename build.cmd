@@ -43,7 +43,7 @@ if %ERRORLEVEL% EQU 0 (
 
 rem **** cloning asesprite repo
 
-git clone --quiet -c advice.detachedHead=false --no-tags --recursive --depth=1 -b "%ASEPRITE_VERSION%" https://github.com/aseprite/aseprite.git || echo "failed to clone repo" && exit /b
+git clone --quiet -c advice.detachedHead=false --no-tags --recursive --depth=1 -b "%ASEPRITE_VERSION%" https://github.com/aseprite/aseprite.git || echo "failed to clone repo" && exit /b 1
 python -c "v = open('aseprite/src/ver/CMakeLists.txt').read(); open('aseprite/src/ver/CMakeLists.txt', 'w').write(v.replace('1.x-dev', '%ASEPRITE_VERSION%'[1:]))"
 
 
@@ -66,11 +66,12 @@ cmake                                          ^
   -DCMAKE_BUILD_TYPE=Release                   ^
   -DCMAKE_C_FLAGS="/MP"                        ^
   -DCMAKE_CXX_FLAGS="/MP"                      ^
+  -DENABLE_CCACHE=OFF                          ^
   -DLAF_BACKEND=skia                           ^
   -DSKIA_DIR=%CD%\skia                         ^
   -DSKIA_LIBRARY_DIR=%CD%\skia\out\Release-x64 ^
   -DSKIA_OPENGL_LIBRARY=                        || echo failed to configure build && exit /b 1
-ninja -C build || echo "build failed" || exit /b 1
+ninja -C build || echo "build failed" && exit /b 1
 
 
 rem *** creating zip file
