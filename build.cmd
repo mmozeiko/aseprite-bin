@@ -67,6 +67,7 @@ cmake                                          ^
   -DCMAKE_C_FLAGS="/MP"                        ^
   -DCMAKE_CXX_FLAGS="/MP"                      ^
   -DENABLE_CCACHE=OFF                          ^
+  -DOPENSSL_USE_STATIC_LIBS=TRUE               ^
   -DLAF_BACKEND=skia                           ^
   -DSKIA_DIR=%CD%\skia                         ^
   -DSKIA_LIBRARY_DIR=%CD%\skia\out\Release-x64 ^
