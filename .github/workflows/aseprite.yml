@@ -1,46 +1,24 @@
 
 name: aseprite
 
-on:
-  schedule:
-    - cron: "0 0 * * *"
-  push:
-    branches:
-      - master
+on: workflow_dispatch
 
 jobs:
   build:
     runs-on: windows-2022
     steps:
 
-      - name: checkout
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: build
+      - name: Build
         id: build
         shell: cmd
         run: call build.cmd
-        
-      - name: release
-        id: release
-        if: steps.build.outputs.ASEPRITE_VERSION != ''
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.build.outputs.ASEPRITE_VERSION }}
-          release_name: ${{ steps.build.outputs.ASEPRITE_VERSION }}
-          body: |
-            [Aseprite ${{ steps.build.outputs.ASEPRITE_VERSION }}](https://github.com/aseprite/aseprite/releases/tag/${{ steps.build.outputs.ASEPRITE_VERSION }})
 
-      - if: steps.build.outputs.ASEPRITE_VERSION != ''
-        id: upload
-        name: upload
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Archive
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: ./aseprite-${{ steps.build.outputs.ASEPRITE_VERSION }}.zip
-          asset_name: aseprite-${{ steps.build.outputs.ASEPRITE_VERSION }}.zip
-          asset_content_type: application/zip
+          name: aseprite-${{ steps.build.outputs.ASEPRITE_VERSION }}
+          path: github
+          if-no-files-found: error
