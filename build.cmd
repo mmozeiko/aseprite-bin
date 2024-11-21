@@ -70,7 +70,11 @@ rem *** download skia
 if not exist skia (
   mkdir skia
   pushd skia
-  curl -sfLO https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-Windows-Release-x64.zip || echo failed to download skia && exit /b 1
+  if "%ASEPRITE_VERSION:beta=%" neq "%ASEPRITE_VERSION%" (
+    curl -sfLO https://github.com/aseprite/skia/releases/download/m124-08a5439a6b/Skia-Windows-Release-x64.zip || echo failed to download skia && exit /b 1
+  ) else (
+    curl -sfLO https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-Windows-Release-x64.zip || echo failed to download skia && exit /b 1
+  )
   7z x -y Skia-Windows-Release-x64.zip
   popd
 )
