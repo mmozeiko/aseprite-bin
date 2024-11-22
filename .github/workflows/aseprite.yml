@@ -1,7 +1,12 @@
-
 name: aseprite
 
-on: workflow_dispatch
+on: 
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v1.2.3)'
+        required: true
+        default: 'v1.0.0'
 
 jobs:
   build:
@@ -19,6 +24,27 @@ jobs:
       - name: Archive
         uses: actions/upload-artifact@v4
         with:
-          name: aseprite-${{ steps.build.outputs.ASEPRITE_VERSION }}
+          name: aseprite-${{ github.event.inputs.version }}
           path: github
           if-no-files-found: error
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          release_name: Release ${{ github.event.inputs.version }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Artifact to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./github/aseprite-${{ github.event.inputs.version }}
+          asset_name: aseprite-${{ github.event.inputs.version }}.zip
+          asset_content_type: application/zip
