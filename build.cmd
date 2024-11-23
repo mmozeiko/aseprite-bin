@@ -43,10 +43,18 @@ where /q ninja.exe || (
 
 rem *** fetch latest release version
 
-for /F "delims=" %%v in ('"curl -sfL https://api.github.com/repos/aseprite/aseprite/releases/latest | jq .tag_name -r"') do (
-  set ASEPRITE_VERSION=%%v
+if "%ASEPRITE_VERSION%" equ "" (
+  for /F "delims=" %%v in ('"curl -sfL https://api.github.com/repos/aseprite/aseprite/releases/latest | jq .tag_name -r"') do (
+    set ASEPRITE_VERSION=%%v
+  )
 )
 echo building %ASEPRITE_VERSION%
+
+if "%ASEPRITE_VERSION:beta=%" neq "%ASEPRITE_VERSION%" (
+  set SKIA_VERSION=m124-08a5439a6b
+) else (
+  set SKIA_VERSION=m102-861e4743af
+)
 
 
 rem **** clone aseprite repo
@@ -67,15 +75,11 @@ python -c "v = open('aseprite/src/ver/CMakeLists.txt').read(); open('aseprite/sr
 
 rem *** download skia
 
-if not exist skia (
-  mkdir skia
-  pushd skia
-  if "%ASEPRITE_VERSION:beta=%" neq "%ASEPRITE_VERSION%" (
-    curl -sfLO https://github.com/aseprite/skia/releases/download/m124-08a5439a6b/Skia-Windows-Release-x64.zip || echo failed to download skia && exit /b 1
-  ) else (
-    curl -sfLO https://github.com/aseprite/skia/releases/download/m102-861e4743af/Skia-Windows-Release-x64.zip || echo failed to download skia && exit /b 1
-  )
-  7z x -y Skia-Windows-Release-x64.zip
+if not exist skia-%SKIA_VERSION% (
+  mkdir skia-%SKIA_VERSION%
+  pushd skia-%SKIA_VERSION%
+  curl -sfLO https://github.com/aseprite/skia/releases/download/%SKIA_VERSION%/Skia-Windows-Release-x64.zip || echo failed to download skia && exit /b 1
+  %SZIP% x -y Skia-Windows-Release-x64.zip
   popd
 )
 
@@ -85,22 +89,22 @@ rem *** build aseprite
 if exist build rd /s /q build
 
 set LINK=opengl32.lib
-cmake                                          ^
-  -G Ninja                                     ^
-  -S aseprite                                  ^
-  -B build                                     ^
-  -DCMAKE_BUILD_TYPE=Release                   ^
-  -DCMAKE_POLICY_DEFAULT_CMP0074=NEW           ^
-  -DCMAKE_POLICY_DEFAULT_CMP0091=NEW           ^
-  -DCMAKE_POLICY_DEFAULT_CMP0092=NEW           ^
-  -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded   ^
-  -DENABLE_CCACHE=OFF                          ^
-  -DOPENSSL_USE_STATIC_LIBS=TRUE               ^
-  -DLAF_BACKEND=skia                           ^
-  -DSKIA_DIR=%CD%\skia                         ^
-  -DSKIA_LIBRARY_DIR=%CD%\skia\out\Release-x64 ^
-  -DSKIA_OPENGL_LIBRARY=                        || echo failed to configure build && exit /b 1
-ninja -C build || echo "build failed" && exit /b 1
+cmake.exe                                                     ^
+  -G Ninja                                                    ^
+  -S aseprite                                                 ^
+  -B build                                                    ^
+  -DCMAKE_BUILD_TYPE=Release                                  ^
+  -DCMAKE_POLICY_DEFAULT_CMP0074=NEW                          ^
+  -DCMAKE_POLICY_DEFAULT_CMP0091=NEW                          ^
+  -DCMAKE_POLICY_DEFAULT_CMP0092=NEW                          ^
+  -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded                  ^
+  -DENABLE_CCACHE=OFF                                         ^
+  -DOPENSSL_USE_STATIC_LIBS=TRUE                              ^
+  -DLAF_BACKEND=skia                                          ^
+  -DSKIA_DIR=%CD%\skia-%SKIA_VERSION%                         ^
+  -DSKIA_LIBRARY_DIR=%CD%\skia-%SKIA_VERSION%\out\Release-x64 ^
+  -DSKIA_OPENGL_LIBRARY=                                      || echo failed to configure build && exit /b 1
+ninja.exe -C build || echo build failed && exit /b 1
 
 
 rem *** create output folder

@@ -1,7 +1,12 @@
 
 name: aseprite
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build, leave empty for latest"
+        required: false
 
 jobs:
   build:
@@ -15,6 +20,8 @@ jobs:
         id: build
         shell: cmd
         run: call build.cmd
+        env:
+          ASEPRITE_VERSION: ${{ github.event.inputs.version }}
 
       - name: Archive
         uses: actions/upload-artifact@v4

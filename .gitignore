@@ -1,4 +1,4 @@
 *.zip
-skia
+skia*
 build
 aseprite*
