@@ -1,5 +1,4 @@
-
-name: aseprite
+name: Aseprite
 
 on:
   workflow_dispatch:
@@ -7,12 +6,15 @@ on:
       version:
         description: "Version to build, leave empty for latest"
         required: false
+      publish-release:
+        description: "Publish the build as a release"
+        required: true
+        type: boolean
 
 jobs:
   build:
     runs-on: windows-2022
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -26,6 +28,14 @@ jobs:
       - name: Archive
         uses: actions/upload-artifact@v4
         with:
-          name: aseprite-${{ steps.build.outputs.ASEPRITE_VERSION }}
-          path: github
+          name: Aseprite ${{ steps.build.outputs.ASEPRITE_VERSION }}
+          path: Aseprite-${{ steps.build.outputs.ASEPRITE_VERSION }}
           if-no-files-found: error
+
+      - name: Publish Release
+        if: ${{ inputs['publish-release'] }}
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Aseprite-${{ steps.build.outputs.ASEPRITE_VERSION }}.zip
+          name: Aseprite ${{ steps.build.outputs.ASEPRITE_VERSION }}
+          tag_name: "ci-${{ steps.build.outputs.ASEPRITE_VERSION }}"

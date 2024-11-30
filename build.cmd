@@ -109,14 +109,14 @@ ninja.exe -C build || echo build failed && exit /b 1
 
 rem *** create output folder
 
-mkdir aseprite-%ASEPRITE_VERSION%
-echo # This file is here so Aseprite behaves as a portable program >aseprite-%ASEPRITE_VERSION%\aseprite.ini
-xcopy /E /Q /Y aseprite\docs aseprite-%ASEPRITE_VERSION%\docs\
-xcopy /E /Q /Y build\bin\aseprite.exe aseprite-%ASEPRITE_VERSION%\
-xcopy /E /Q /Y build\bin\data aseprite-%ASEPRITE_VERSION%\data\
+mkdir Aseprite-%ASEPRITE_VERSION%
+echo # This file is here so Aseprite behaves as a portable program > Aseprite-%ASEPRITE_VERSION%\aseprite.ini
+xcopy /E /Q /Y aseprite\docs Aseprite-%ASEPRITE_VERSION%\docs\
+xcopy /E /Q /Y build\bin\aseprite.exe Aseprite-%ASEPRITE_VERSION%\
+xcopy /E /Q /Y build\bin\data Aseprite-%ASEPRITE_VERSION%\data\
+
+%SZIP% a -r Aseprite-%ASEPRITE_VERSION%.zip Aseprite-%ASEPRITE_VERSION%
 
 if "%GITHUB_WORKFLOW%" neq "" (
-  mkdir github
-  move aseprite-%ASEPRITE_VERSION% github\
   echo ASEPRITE_VERSION=%ASEPRITE_VERSION%>>%GITHUB_OUTPUT%
 )
