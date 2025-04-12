@@ -94,6 +94,7 @@ cmake.exe                                                     ^
   -S aseprite                                                 ^
   -B build                                                    ^
   -DCMAKE_BUILD_TYPE=Release                                  ^
+  -DCMAKE_POLICY_VERSION_MINIMUM=3.5                          ^
   -DCMAKE_POLICY_DEFAULT_CMP0074=NEW                          ^
   -DCMAKE_POLICY_DEFAULT_CMP0091=NEW                          ^
   -DCMAKE_POLICY_DEFAULT_CMP0092=NEW                          ^
