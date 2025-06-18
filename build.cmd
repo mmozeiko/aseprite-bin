@@ -50,13 +50,6 @@ if "%ASEPRITE_VERSION%" equ "" (
 )
 echo building %ASEPRITE_VERSION%
 
-if "%ASEPRITE_VERSION:beta=%" neq "%ASEPRITE_VERSION%" (
-  set SKIA_VERSION=m124-08a5439a6b
-) else (
-  set SKIA_VERSION=m102-861e4743af
-)
-
-
 rem **** clone aseprite repo
 
 if exist aseprite (
@@ -74,6 +67,16 @@ python -c "v = open('aseprite/src/ver/CMakeLists.txt').read(); open('aseprite/sr
 
 
 rem *** download skia
+
+if exist aseprite\laf\misc\skia-tag.txt (
+  set /p SKIA_VERSION=<aseprite\laf\misc\skia-tag.txt
+) else (
+  if "%ASEPRITE_VERSION:beta=%" neq "%ASEPRITE_VERSION%" (
+    set SKIA_VERSION=m124-08a5439a6b
+  ) else (
+    set SKIA_VERSION=m102-861e4743af
+  )
+)
 
 if not exist skia-%SKIA_VERSION% (
   mkdir skia-%SKIA_VERSION%
