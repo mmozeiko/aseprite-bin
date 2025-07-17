@@ -35,7 +35,7 @@ where /Q cl.exe || (
 rem *** ninja
 
 where /q ninja.exe || (
-  curl -LOsf https://github.com/ninja-build/ninja/releases/download/v1.11.0/ninja-win.zip || exit /b 1
+  curl -LOsf https://github.com/ninja-build/ninja/releases/latest/download/ninja-win.zip || exit /b 1
   %SZIP% x -bb0 -y ninja-win.zip 1>nul 2>nul || exit /b 1
   del ninja-win.zip 1>nul 2>nul
 )
