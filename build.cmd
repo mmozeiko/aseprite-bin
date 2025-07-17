@@ -44,7 +44,7 @@ where /q ninja.exe || (
 rem *** fetch latest release version
 
 if "%ASEPRITE_VERSION%" equ "" (
-  for /F "delims=" %%v in ('"curl -sfL https://api.github.com/repos/aseprite/aseprite/releases/latest | jq .tag_name -r"') do (
+  for /F "delims=" %%v in ('"curl -sfL https://api.github.com/repos/aseprite/aseprite/tags | jq .[0].name -r"') do (
     set ASEPRITE_VERSION=%%v
   )
 )
