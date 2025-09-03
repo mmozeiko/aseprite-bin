@@ -41,28 +41,34 @@ where /q ninja.exe || (
 )
 
 
-rem *** fetch latest release version
+rem *** clone aseprite repo
+
+if not exist aseprite (
+  call git clone --recursive --tags https://github.com/aseprite/aseprite.git aseprite || echo "failed to clone repo" && exit /b 1
+) else (
+  call git -C aseprite fetch --tags || echo "failed to fetch repo" && exit /b 1
+)
+
+
+rem *** get name of newest tag
 
 if "%ASEPRITE_VERSION%" equ "" (
-  for /F "delims=" %%v in ('"curl -sfL https://api.github.com/repos/aseprite/aseprite/releases/latest | jq .tag_name -r"') do (
+  for /F "delims=" %%v in ('"git -C aseprite tag --sort=creatordate"') do (
     set ASEPRITE_VERSION=%%v
   )
 )
+
 echo building %ASEPRITE_VERSION%
 
-rem **** clone aseprite repo
 
-if exist aseprite (
-  pushd aseprite
-  call git clean --quiet -fdx
-  call git submodule foreach --recursive git clean -xfd
-  call git fetch --quiet --depth=1 --no-tags origin %ASEPRITE_VERSION%:refs/remotes/origin/%ASEPRITE_VERSION% || echo "failed to fetch latest version"     && exit /b 1
-  call git reset --quiet --hard origin/%ASEPRITE_VERSION%                                                     || echo "failed to update to latest version" && exit /b 1
-  call git submodule update --init --recursive                                                                || echo "failed to update submodules"        && exit /b 1
-  popd
-) else (
-  call git clone --quiet -c advice.detachedHead=false --no-tags --recursive --depth=1 -b "%ASEPRITE_VERSION%" https://github.com/aseprite/aseprite.git || echo "failed to clone repo" && exit /b 1
-)
+rem **** update local aseprite repo to selected tag
+
+call git -C aseprite clean --quiet -fdx
+call git -C aseprite submodule foreach --recursive git clean -xfd
+call git -C aseprite fetch --quiet --depth=1 --no-tags origin %ASEPRITE_VERSION%:refs/remotes/origin/%ASEPRITE_VERSION% || echo "failed to fetch repo"        && exit /b 1
+call git -C aseprite reset --quiet --hard origin/%ASEPRITE_VERSION%                                                     || echo "failed to update repo"       && exit /b 1
+call git -C aseprite submodule update --init --recursive                                                                || echo "failed to update submodules" && exit /b 1
+
 python -c "v = open('aseprite/src/ver/CMakeLists.txt').read(); open('aseprite/src/ver/CMakeLists.txt', 'w').write(v.replace('1.x-dev', '%ASEPRITE_VERSION%'[1:]))"
 
 
@@ -122,5 +128,5 @@ xcopy /E /Q /Y build\bin\data aseprite-%ASEPRITE_VERSION%\data\
 if "%GITHUB_WORKFLOW%" neq "" (
   mkdir github
   move aseprite-%ASEPRITE_VERSION% github\
-  echo ASEPRITE_VERSION=%ASEPRITE_VERSION%>>%GITHUB_OUTPUT%
+  echo ASEPRITE_VERSION=%ASEPRITE_VERSION%>>"%GITHUB_OUTPUT%"
 )
