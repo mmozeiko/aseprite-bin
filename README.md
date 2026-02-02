@@ -1,5 +1,7 @@
 [Aseprite][] binary build for 64-bit Windows.
 
+To purchase Aseprite license visit its [download page][].
+
 Step by step guide to build binaries for latest version:
 
 # 1. Create fork by clicking `Fork` button on the top right
@@ -31,3 +33,4 @@ For building newer aseprite version repeat steps 3 to 5.
 
 [Aseprite]: https://github.com/aseprite/aseprite
 [versions]: https://github.com/aseprite/aseprite/tags
+[download page]: https://www.aseprite.org/download/
