@@ -1,4 +1,3 @@
-
 name: aseprite
 
 on:
@@ -10,22 +9,70 @@ on:
 
 jobs:
   build:
-    runs-on: windows-2025
-    steps:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: ubuntu
+          - os: macos-latest
+            name: macos
+          - os: ubuntu-latest
+            name: arch
+            container: archlinux:latest
+          - os: windows-2025
+            name: windows
 
+    runs-on: ${{ matrix.os }}
+
+    container: ${{ matrix.container || null }}
+
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build
-        id: build
+      - name: Install dependencies (Ubuntu)
+        if: matrix.name == 'ubuntu'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build libx11-dev libxcursor-dev libxi-dev libgl1-mesa-dev libfontconfig1-dev
+
+      - name: Install dependencies (Arch)
+        if: matrix.name == 'arch'
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm base-devel cmake ninja git libx11 libxcursor libxi mesa fontconfig
+
+      - name: Build (Windows)
+        if: matrix.name == 'windows'
+        id: build-windows
         shell: cmd
         run: call build.cmd
         env:
           ASEPRITE_VERSION: ${{ github.event.inputs.version }}
 
-      - name: Archive
+      - name: Build (Unix)
+        if: matrix.name != 'windows'
+        id: build-unix
+        shell: bash
+        run: |
+          chmod +x build.sh
+          ./build.sh
+        env:
+          ASEPRITE_VERSION: ${{ github.event.inputs.version }}
+
+      - name: Archive (Windows)
+        if: matrix.name == 'windows'
         uses: actions/upload-artifact@v4
         with:
-          name: aseprite-${{ steps.build.outputs.ASEPRITE_VERSION }}
+          name: aseprite-${{ steps.build-windows.outputs.ASEPRITE_VERSION }}-${{ matrix.name }}
+          path: github
+          if-no-files-found: error
+
+      - name: Archive (Unix)
+        if: matrix.name != 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: aseprite-${{ steps.build-unix.outputs.ASEPRITE_VERSION }}-${{ matrix.name }}
           path: github
           if-no-files-found: error
