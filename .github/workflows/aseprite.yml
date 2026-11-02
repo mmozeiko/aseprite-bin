@@ -14,7 +14,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Build
         id: build
@@ -24,7 +24,7 @@ jobs:
           ASEPRITE_VERSION: ${{ github.event.inputs.version }}
 
       - name: Archive
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: aseprite-${{ steps.build.outputs.ASEPRITE_VERSION }}
           path: github
